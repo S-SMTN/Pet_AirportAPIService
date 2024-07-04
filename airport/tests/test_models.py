@@ -176,5 +176,23 @@ class ModelTests(TestCase):
         )
 
     def test_ticket_unique(self) -> None:
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ValidationError):
             self.same_ticket()
+
+    def test_incorrect_ticket_seat(self) -> None:
+        with self.assertRaises(ValidationError):
+            Ticket.objects.create(
+                row=self.airplane.rows,
+                seat=self.airplane.seats_in_row + 1,
+                flight=self.ticket.flight,
+                order=self.ticket.order
+            )
+
+    def test_incorrect_ticket_row(self) -> None:
+        with self.assertRaises(ValidationError):
+            Ticket.objects.create(
+                row=self.airplane.rows + 1,
+                seat=self.airplane.seats_in_row,
+                flight=self.ticket.flight,
+                order=self.ticket.order
+            )

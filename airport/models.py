@@ -180,6 +180,18 @@ class Ticket(models.Model):
             ValidationError,
         )
 
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
+
     def __str__(self) -> str:
         return f"{self.flight} (row: {self.row}, seat: {self.seat})"
 
