@@ -29,6 +29,10 @@ class Route(models.Model):
     )
     distance = models.PositiveIntegerField()
 
+    @property
+    def full_route(self) -> str:
+        return str(self)
+
     @staticmethod
     def validate_route(
             source: str,
@@ -108,6 +112,10 @@ class Airplane(models.Model):
 class Crew(models.Model):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
+
+    @property
+    def full_name(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
