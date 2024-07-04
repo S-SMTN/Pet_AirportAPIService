@@ -5,11 +5,14 @@ from django.db.models.query import QuerySet
 
 from airport.models import (
     Airport,
-    Route
+    Route,
+    AirplaneType
 )
 from airport.serializers import (
     AirportSerializer,
-    RouteSerializer, RouteListSerializer
+    RouteSerializer,
+    RouteListSerializer,
+    AirplaneTypeSerializer
 )
 
 
@@ -38,6 +41,11 @@ class RouteViewSet(ReadUpdateModelViewSet):
         return RouteSerializer
 
     def get_queryset(self) -> QuerySet:
-        if self.action == "list":
+        if self.action in ("list", "retrieve"):
             return Route.objects.all().select_related("source", "destination")
         return Route.objects.all()
+
+
+class AirplaneTypeViewSet(ReadUpdateModelViewSet):
+    queryset = AirplaneType.objects.all()
+    serializer_class = AirplaneTypeSerializer
