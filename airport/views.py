@@ -6,7 +6,9 @@ from django.db.models.query import QuerySet
 from airport.models import (
     Airport,
     Route,
-    AirplaneType, Airplane
+    AirplaneType,
+    Airplane,
+    Crew
 )
 from airport.serializers import (
     AirportSerializer,
@@ -17,6 +19,7 @@ from airport.serializers import (
     AirplaneSerializer,
     AirplaneListSerializer,
     AirplaneRetrieveSerializer,
+    CrewSerializer,
 )
 
 
@@ -71,3 +74,8 @@ class AirplaneViewSet(ReadUpdateModelViewSet):
         if self.action in ("list", "retrieve"):
             return Airplane.objects.all().select_related("airplane_type")
         return Airplane.objects.all()
+
+
+class CrewViewSet(ReadUpdateModelViewSet):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
