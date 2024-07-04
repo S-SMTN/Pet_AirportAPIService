@@ -29,9 +29,24 @@ class Route(models.Model):
     )
     distance = models.PositiveIntegerField()
 
+    @staticmethod
+    def validate_route(
+            source: str,
+            destination: str,
+            error_to_raise: type[Exception]
+    ) -> None:
+        error_text = {
+            "Route": "Source and destination must be different"
+        }
+        if source == destination:
+            raise error_to_raise(error_text)
+
     def clean(self):
-        if self.source == self.destination:
-            raise ValidationError("Source and destination must be different")
+        self.validate_route(
+            source=str(self.source),
+            destination=str(self.destination),
+            error_to_raise=ValidationError
+        )
 
     def save(
         self,
