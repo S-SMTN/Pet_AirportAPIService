@@ -27,7 +27,23 @@ class Route(models.Model):
         on_delete=models.PROTECT,
         related_name="routes_as_destination"
     )
-    distance = models.IntegerField()
+    distance = models.PositiveIntegerField()
+
+    def clean(self):
+        if self.source == self.destination:
+            raise ValidationError("Source and destination must be different")
+
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Route, self).save(
+            force_insert, force_update, using, update_fields
+        )
 
     def __str__(self) -> str:
         return f"{self.source}-{self.destination}"
@@ -126,8 +142,8 @@ class Order(models.Model):
 
 
 class Ticket(models.Model):
-    row = models.IntegerField()
-    seat = models.IntegerField()
+    row = models.PositiveIntegerField()
+    seat = models.PositiveIntegerField()
     flight = models.ForeignKey(
         to=Flight,
         on_delete=models.PROTECT,
@@ -165,9 +181,7 @@ class Ticket(models.Model):
         )
 
     def __str__(self) -> str:
-        return (
-            f"{self.flight} (row: {self.row}, seat: {self.seat}"
-        )
+        return f"{self.flight} (row: {self.row}, seat: {self.seat})"
 
     class Meta:
         unique_together = ("flight", "row", "seat")
