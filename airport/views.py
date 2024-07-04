@@ -6,13 +6,17 @@ from django.db.models.query import QuerySet
 from airport.models import (
     Airport,
     Route,
-    AirplaneType
+    AirplaneType, Airplane
 )
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
     RouteListSerializer,
-    AirplaneTypeSerializer
+    RouteRetrieveSerializer,
+    AirplaneTypeSerializer,
+    AirplaneSerializer,
+    AirplaneListSerializer,
+    AirplaneRetrieveSerializer,
 )
 
 
@@ -35,8 +39,10 @@ class RouteViewSet(ReadUpdateModelViewSet):
     queryset = Route.objects.all()
 
     def get_serializer_class(self) -> type[ModelSerializer]:
-        if self.action in ("list", "retrieve"):
+        if self.action == "list":
             return RouteListSerializer
+        if self.action == "retrieve":
+            return RouteRetrieveSerializer
 
         return RouteSerializer
 
@@ -49,3 +55,19 @@ class RouteViewSet(ReadUpdateModelViewSet):
 class AirplaneTypeViewSet(ReadUpdateModelViewSet):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
+
+
+class AirplaneViewSet(ReadUpdateModelViewSet):
+    queryset = Airplane.objects.all()
+
+    def get_serializer_class(self) -> type[ModelSerializer]:
+        if self.action == "list":
+            return AirplaneListSerializer
+        if self.action == "retrieve":
+            return AirplaneRetrieveSerializer
+        return AirplaneSerializer
+
+    def get_queryset(self) -> QuerySet:
+        if self.action in ("list", "retrieve"):
+            return Airplane.objects.all().select_related("airplane_type")
+        return Airplane.objects.all()
