@@ -98,22 +98,33 @@ class FlightSerializer(serializers.ModelSerializer):
         )
 
 
-class FlightListSerializer(FlightSerializer):
+class FlightListSerializer(serializers.ModelSerializer):
     route = serializers.SlugRelatedField(
         read_only=True, slug_field="full_route"
     )
     airplane = serializers.SlugRelatedField(
         read_only=True, slug_field="name"
     )
+    airplane_capacity = serializers.IntegerField(
+        source="airplane.capacity", read_only=True
+    )
     crew = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="full_name"
     )
+    tickets_available = serializers.IntegerField(read_only=True)
 
-
-class FlightRetrieveSerializer(FlightSerializer):
-    route = RouteRetrieveSerializer(read_only=True)
-    airplane = AirplaneRetrieveSerializer(read_only=True)
-    crew = CrewSerializer(many=True, read_only=True)
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "airplane_capacity",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "tickets_available"
+        )
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -130,6 +141,33 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "flight")
+
+
+class TicketSeatsSerializer(TicketSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat")
+
+
+class FlightRetrieveSerializer(serializers.ModelSerializer):
+    route = RouteRetrieveSerializer(read_only=True)
+    airplane = AirplaneRetrieveSerializer(read_only=True)
+    crew = CrewSerializer(many=True, read_only=True)
+    taken_places = TicketSeatsSerializer(
+        source="tickets", many=True, read_only=True
+    )
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "taken_places"
+        )
 
 
 class TicketListSerializer(TicketSerializer):

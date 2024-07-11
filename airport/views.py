@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.db.models import F, Count
 
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
@@ -91,7 +92,15 @@ class CrewViewSet(ReadUpdateModelViewSet):
 
 
 class FlightViewSet(ReadUpdateModelViewSet):
-    queryset = Flight.objects.all()
+    queryset = (
+        Flight.objects.all()
+        .annotate(
+            tickets_available=(
+                    F("airplane__rows") * F("airplane__seats_in_row")
+                    - Count("tickets")
+            )
+        )
+    )
 
     def get_serializer_class(self) -> type[ModelSerializer]:
         if self.action == "list":
