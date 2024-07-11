@@ -4,6 +4,7 @@ from django.db.models import F, Count
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.serializers import ModelSerializer
+from rest_framework.pagination import PageNumberPagination
 from django.db.models.query import QuerySet
 
 from airport.models import (
@@ -141,12 +142,18 @@ class FlightViewSet(ReadUpdateModelViewSet):
         return queryset
 
 
+class OrderPagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 100
+
+
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
     queryset = Order.objects.all()
+    pagination_class = OrderPagination
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset.filter(user=self.request.user)
