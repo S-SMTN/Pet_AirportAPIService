@@ -1,4 +1,6 @@
-from rest_framework import mixins, status
+from datetime import datetime
+
+from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.serializers import ModelSerializer
 from django.db.models.query import QuerySet
@@ -99,15 +101,35 @@ class FlightViewSet(ReadUpdateModelViewSet):
         return FlightSerializer
 
     def get_queryset(self) -> QuerySet:
+        queryset = self.queryset
+
+        source_id_str = self.request.query_params.get("source")
+        destination_id_str = self.request.query_params.get("destination")
+        departure = self.request.query_params.get("departure")
+
+        if source_id_str:
+            queryset = queryset.filter(
+                route__source_id=int(source_id_str)
+            )
+
+        if destination_id_str:
+            queryset = queryset.filter(
+                route__destination_id=int(destination_id_str)
+            )
+
+        if departure:
+            date = datetime.strptime(departure, "%Y-%m-%d").date()
+            queryset = queryset.filter(departure_time__date=date)
+
         if self.action in ("list", "retrieve"):
-            return Flight.objects.all().select_related(
+            return queryset.select_related(
                 "route__source",
                 "route__destination",
                 "airplane__airplane_type",
             ).prefetch_related(
                 "crew",
             )
-        return Flight.objects.all()
+        return queryset
 
 
 class OrderViewSet(
