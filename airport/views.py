@@ -6,6 +6,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.serializers import ModelSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models.query import QuerySet
+from rest_framework.permissions import IsAuthenticated
 
 from airport.models import (
     Airport,
@@ -16,6 +17,7 @@ from airport.models import (
     Flight,
     Order
 )
+from airport.permissions import IsAdminOrReadOnly
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
@@ -41,7 +43,7 @@ class ReadUpdateModelViewSet(
     mixins.UpdateModelMixin,
     GenericViewSet
 ):
-    pass
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class AirportViewSet(ReadUpdateModelViewSet):
@@ -154,6 +156,7 @@ class OrderViewSet(
 ):
     queryset = Order.objects.all()
     pagination_class = OrderPagination
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset.filter(user=self.request.user)
